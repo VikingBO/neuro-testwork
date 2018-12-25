@@ -21,6 +21,11 @@ class routing_controller
         $this->db = new db();
     }
 
+    /**
+     * Возвращаем все доступные маршруты из базы
+     *
+     * @return false|string
+     */
     public function start()
     {
         $query = 'SELECT * FROM routing AS r ORDER BY r.`add_time` ASC';
@@ -30,15 +35,26 @@ class routing_controller
         return json_encode($result);
     }
 
+    /**
+     *  Очищаем базу от старых (больше 2 минут) и добавленных не в ручную маршрутов
+     */
     public function clear()
     {
-        $this->db->delete('DELETE FROM `routing` WHERE `add_time` < ' . (time() + (60*2)));
+        $this->db->delete("DELETE FROM `routing` WHERE `hand_made` = 0 AND `add_time` < '" . date('d.m.Y H:i',time() + (60*2)) . "'");
     }
 
-    public function check($last_number)
+    /**
+     * Проверяем есть ли добавленные записи и если есть выводим их из БД
+     *
+     * @param $data
+     * @return false|string
+     */
+    public function check($data)
     {
+        $this->clear();
+
         $query = 'SELECT * FROM `routing`
-                  WHERE `id` > ' . $last_number . '
+                  WHERE `id` > ' . $data['number'] . '
                   ORDER BY `add_time` DESC';
 
         $result = $this->db->select($query);
@@ -46,6 +62,11 @@ class routing_controller
         return json_encode($result);
     }
 
+    /**
+     * Добавляем рандомный маршрут автоматом каждые 7 секунд
+     *
+     * @return false|string
+     */
     public function add()
     {
         $params = [
@@ -62,6 +83,12 @@ class routing_controller
         return json_encode($result);
     }
 
+    /**
+     * Ручное добавление маршрута
+     *
+     * @param $params
+     * @return false|string
+     */
     public function hand_add($params)
     {
         $result = [];
