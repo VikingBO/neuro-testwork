@@ -14,20 +14,19 @@
 
 class log
 {
-    private static $file = '../logs.txt';
+    private static $file = __DIR__ . '/../logs.txt';
 
     public static function set_log($text = '')
     {
-        $result = false;
-
         if (empty($text)) {
-            $text = "Здесь почему то нет данных но кто-то пытался записать лог\n";
+            $text = "Здесь почему то нет данных но кто-то пытался записать лог";
+        } else if (is_object($text)) {
+            $text = (array) $text;
+            $text = implode($text);
+        } else if (is_array($text)) {
+            $text = implode($text);
         }
 
-        if (file_put_contents(self::$file, $text, FILE_APPEND | LOCK_EX)) {
-            $result = true;
-        }
-
-        return $result;
+        file_put_contents(self::$file, date('d.m.Y H:i', time()) . ' : ' . $text . PHP_EOL, FILE_APPEND | LOCK_EX);
     }
 }

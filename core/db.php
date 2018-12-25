@@ -25,22 +25,58 @@ class db
             $this->db = new PDO($this->dsn, $this->login, $this->pass);
             $result = 'Подключение к базе';
         } catch (Exception $e) {
-            $result = 'Произошла ошибка подключения к базе данных' . $e;
+            $result = 'Произошла ошибка подключения к базе данных' . $e->getMessage();
         }
 
         log::set_log($result);
     }
 
-    public function query($queryString = '')
+    public function select($queryString = '')
     {
         $result = $queryString;
 
         if (!empty($queryString)) {
             try {
-                $result = $this->db->query($queryString);
+                $result = $this->db->query($queryString)->fetchAll();
             } catch (Exception $e) {
                 $result = [
-                    'error' => $e
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+
+        log::set_log($result);
+        return $result;
+    }
+
+    public function insert($queryString)
+    {
+        $result = $queryString;
+
+        if (!empty($queryString)) {
+            try {
+                $result = $this->db->exec($queryString);
+            } catch (Exception $e) {
+                $result = [
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+
+        log::set_log($result);
+        return $result;
+    }
+
+    public function delete($queryString)
+    {
+        $result = $queryString;
+
+        if (!empty($queryString)) {
+            try {
+                $result = $this->db->exec($queryString);
+            } catch (Exception $e) {
+                $result = [
+                    'error' => $e->getMessage()
                 ];
             }
         }
